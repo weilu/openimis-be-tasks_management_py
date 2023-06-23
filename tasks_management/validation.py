@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 
 from core.validation import BaseModelValidation
-from tasks_management.models import TaskGroup
+from tasks_management.models import TaskGroup, TaskExecutor
 
 
 class TaskGroupValidation(BaseModelValidation):
@@ -14,6 +14,10 @@ class TaskGroupValidation(BaseModelValidation):
         if errors:
             raise ValidationError(errors)
         super().validate_create(user, **data)
+
+
+class TaskExecutorValidation(BaseModelValidation):
+    OBJECT_TYPE = TaskExecutor
 
 
 def validate_task_group(data, uuid=None):
