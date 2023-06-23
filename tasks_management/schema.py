@@ -7,8 +7,8 @@ from core.schema import OrderedDjangoFilterConnectionField
 from core.utils import append_validity_filter
 from tasks_management.apps import TasksManagementConfig
 from tasks_management.gql_mutations import CreateTaskGroupMutation
-from tasks_management.gql_queries import TaskGroupGQLType
-from tasks_management.models import TaskGroup
+from tasks_management.gql_queries import TaskGroupGQLType, TaskExecutorGQLType
+from tasks_management.models import TaskGroup, TaskExecutor
 
 import graphene_django_optimizer as gql_optimizer
 
@@ -18,6 +18,13 @@ class Query(graphene.ObjectType):
 
     task_group = OrderedDjangoFilterConnectionField(
         TaskGroupGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
+        dateValidFrom__Gte=graphene.DateTime(),
+        dateValidTo__Lte=graphene.DateTime(),
+        client_mutation_id=graphene.String(),
+    )
+    task_executor = OrderedDjangoFilterConnectionField(
+        TaskExecutorGQLType,
         orderBy=graphene.List(of_type=graphene.String),
         dateValidFrom__Gte=graphene.DateTime(),
         dateValidTo__Lte=graphene.DateTime(),
@@ -36,6 +43,23 @@ class Query(graphene.ObjectType):
             TasksManagementConfig.gql_task_group_search_perms
         )
         query = TaskGroup.objects.filter(*filters)
+        return gql_optimizer.query(query, info)
+
+    def resolve_task_executor(self, info, **kwargs):
+        filters = append_validity_filter(**kwargs)
+
+        client_mutation_id = kwargs.get("client_mutation_id")
+        if client_mutation_id:
+            filters.append(Q(mutations__mutation__client_mutation_id=client_mutation_id))
+
+        task_group_id = kwargs.get("taskGroupId")
+        if task_group_id:
+            filters.append(Q(taskgroup__user__id=task_group_id))
+
+        user = info.context.user
+        if type(user) is AnonymousUser:
+            raise PermissionError("Unauthorized")
+        query = TaskExecutor.objects.filter(*filters)
         return gql_optimizer.query(query, info)
 
     @staticmethod
