@@ -48,9 +48,9 @@ def on_migration(apps, schema_editor):
 
 
 def on_migration_reverse(apps, schema_editor):
-    __delete_task_triage_role()
     __remove_rights_from_role(IMIS_ADMIN)
-    __remove_rights_from_role(TASK_TRIAGE_ROLE_RIGHTS)
+    __remove_rights_from_role(TASK_TRIAGE_ID)
+    __delete_task_triage_role()
 
 
 class Migration(migrations.Migration):

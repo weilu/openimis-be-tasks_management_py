@@ -13,7 +13,7 @@ class LogInHelper:
         "other_names": _TEST_USER_NAME,
         "user_types": "INTERACTIVE",
         "language": "en",
-        "roles": [1, 3, 5, 9, 2097152],
+        "roles": [1, 3, 5, 9],
     }
 
     _TEST_USER_NAME_TASK_EXECUTOR = "TestUserTestTaskExecutor"
