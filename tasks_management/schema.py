@@ -16,7 +16,7 @@ import graphene_django_optimizer as gql_optimizer
 class Query(graphene.ObjectType):
     module_name = "tasks_management"
 
-    benefit_plan = OrderedDjangoFilterConnectionField(
+    task_group = OrderedDjangoFilterConnectionField(
         TaskGroupGQLType,
         orderBy=graphene.List(of_type=graphene.String),
         dateValidFrom__Gte=graphene.DateTime(),
@@ -24,7 +24,7 @@ class Query(graphene.ObjectType):
         client_mutation_id=graphene.String(),
     )
 
-    def resolve_task_groupy(self, info, **kwargs):
+    def resolve_task_group(self, info, **kwargs):
         filters = append_validity_filter(**kwargs)
 
         client_mutation_id = kwargs.get("client_mutation_id", None)
