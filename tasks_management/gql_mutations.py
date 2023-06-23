@@ -6,6 +6,7 @@ from core.gql.gql_mutations.base_mutation import BaseHistoryModelCreateMutationM
 from core.schema import OpenIMISMutation
 from tasks_management.apps import TasksManagementConfig
 from tasks_management.models import TaskGroup
+from tasks_management.services import TaskGroupService
 
 
 class CreateTaskGroup(OpenIMISMutation.Input):

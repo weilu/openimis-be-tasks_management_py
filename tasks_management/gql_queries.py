@@ -11,9 +11,9 @@ class TaskGroupGQLType(DjangoObjectType):
     class Meta:
         model = TaskGroup
         interfaces = (graphene.relay.Node,)
-        filtered_fields = {
+        filter_fields = {
             "id": ["exact"],
             "code": ["exact", "iexact", "startswith", "istartswith", "contains", "icontains"],
-            "completion_policy": ["exact", "iexact", "startswith", "istartswith", "contains", "icontains"],
+            "completion_policy": ["exact", "iexact"],
         }
         connection_class = ExtendedConnection
