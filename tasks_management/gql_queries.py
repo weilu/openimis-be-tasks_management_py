@@ -8,6 +8,8 @@ from tasks_management.models import TaskGroup, TaskExecutor
 
 class TaskGroupGQLType(DjangoObjectType):
     uuid = graphene.String(source='uuid')
+    user = graphene.List(UserGQLType)
+
 
     class Meta:
         model = TaskGroup
@@ -18,6 +20,13 @@ class TaskGroupGQLType(DjangoObjectType):
             "completion_policy": ["exact", "iexact"],
         }
         connection_class = ExtendedConnection
+
+    def resolve_user(self, info):
+        task_group_id = info.variable_values.get('id')
+        if task_group_id:
+            return TaskExecutor.objects.filter(task_group_id=task_group_id)
+        else:
+            return []
 
 
 class TaskExecutorGQLType(DjangoObjectType):

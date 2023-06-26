@@ -6,7 +6,8 @@ from django.db.models import Q
 from core.schema import OrderedDjangoFilterConnectionField
 from core.utils import append_validity_filter
 from tasks_management.apps import TasksManagementConfig
-from tasks_management.gql_mutations import CreateTaskGroupMutation
+from tasks_management.gql_mutations import CreateTaskGroupMutation, UpdateTaskGroupMutation, DeleteTaskGroupMutation, \
+    UpdateTaskGroupTaskExecutorsMutation
 from tasks_management.gql_queries import TaskGroupGQLType, TaskExecutorGQLType
 from tasks_management.models import TaskGroup, TaskExecutor
 
@@ -29,6 +30,7 @@ class Query(graphene.ObjectType):
         dateValidFrom__Gte=graphene.DateTime(),
         dateValidTo__Lte=graphene.DateTime(),
         client_mutation_id=graphene.String(),
+        taskGroupIdStr=graphene.String(),
     )
 
     def resolve_task_group(self, info, **kwargs):
@@ -52,13 +54,14 @@ class Query(graphene.ObjectType):
         if client_mutation_id:
             filters.append(Q(mutations__mutation__client_mutation_id=client_mutation_id))
 
-        task_group_id = kwargs.get("taskGroupId")
-        if task_group_id:
-            filters.append(Q(taskgroup__user__id=task_group_id))
+        task_group_id_str = kwargs.get("taskGroupIdStr")
+        if task_group_id_str:
+            filters.append(Q(taskgroup__user__id_icontains=task_group_id_str))
 
-        user = info.context.user
-        if type(user) is AnonymousUser:
-            raise PermissionError("Unauthorized")
+        Query._check_permissions(
+            info.context.user,
+            TasksManagementConfig.gql_task_group_search_perms
+        )
         query = TaskExecutor.objects.filter(*filters)
         return gql_optimizer.query(query, info)
 
@@ -70,3 +73,7 @@ class Query(graphene.ObjectType):
 
 class Mutation(graphene.ObjectType):
     create_task_group = CreateTaskGroupMutation.Field()
+    update_task_group = UpdateTaskGroupMutation.Field()
+    delete_task_group = DeleteTaskGroupMutation.Field()
+
+    update_task_group_task_executors = UpdateTaskGroupTaskExecutorsMutation.Field()

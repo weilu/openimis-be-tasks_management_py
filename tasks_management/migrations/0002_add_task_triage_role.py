@@ -11,16 +11,16 @@ ROLE_NAME = "Task Triage"
 TASK_TRIAGE_ROLE_RIGHTS = ["190001", "190002", "190003", "190004"]
 
 
-def __get_role(role_id):
+def _get_role(role_id):
     return Role.objects.filter(is_system=role_id).first()
 
 
-def __add_rights_to_role(role):
+def _add_rights_to_role(role):
     for right in TASK_TRIAGE_ROLE_RIGHTS:
         insert_role_right_for_system(role, right)
 
 
-def __remove_rights_from_role(role):
+def _remove_rights_from_role(role):
     RoleRight.objects.filter(
         role__is_system=role,
         right_id__in=TASK_TRIAGE_ROLE_RIGHTS,
@@ -28,29 +28,29 @@ def __remove_rights_from_role(role):
     ).delete()
 
 
-def __create_task_triage_role():
-    role = __get_role(TASK_TRIAGE_ID)
+def _create_task_triage_role():
+    role = _get_role(TASK_TRIAGE_ID)
     if not role:
         task_triage = Role(is_system=TASK_TRIAGE_ID, name=ROLE_NAME, is_blocked=False)
         task_triage.save()
 
 
-def __delete_task_triage_role():
-    role = __get_role(TASK_TRIAGE_ID)
+def _delete_task_triage_role():
+    role = _get_role(TASK_TRIAGE_ID)
     if role:
         role.delete()
 
 
 def on_migration(apps, schema_editor):
-    __create_task_triage_role()
-    __add_rights_to_role(IMIS_ADMIN)
-    __add_rights_to_role(TASK_TRIAGE_ID)
+    _create_task_triage_role()
+    _add_rights_to_role(IMIS_ADMIN)
+    _add_rights_to_role(TASK_TRIAGE_ID)
 
 
 def on_migration_reverse(apps, schema_editor):
-    __remove_rights_from_role(IMIS_ADMIN)
-    __remove_rights_from_role(TASK_TRIAGE_ID)
-    __delete_task_triage_role()
+    _remove_rights_from_role(IMIS_ADMIN)
+    _remove_rights_from_role(TASK_TRIAGE_ID)
+    _delete_task_triage_role()
 
 
 class Migration(migrations.Migration):
