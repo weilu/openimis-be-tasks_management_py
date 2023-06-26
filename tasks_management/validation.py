@@ -1,5 +1,6 @@
 from core.validation import BaseModelValidation
-from tasks_management.models import Task
+
+from .models import Task
 
 
 class TaskValidation(BaseModelValidation):

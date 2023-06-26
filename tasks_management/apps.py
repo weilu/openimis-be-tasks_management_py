@@ -1,11 +1,14 @@
 from django.apps import AppConfig
 
-
 DEFAULT_CONFIG = {
-    "gql_task_management_search_perms": ["190001"],
-    "gql_task_management_create_perms": ["190002"],
-    "gql_task_management_update_perms": ["190003"],
-    "gql_task_management_delete_perms": ["190004"],
+    "gql_task_group_search_perms": ["190001"],
+    "gql_task_group_create_perms": ["190002"],
+    "gql_task_group_update_perms": ["190003"],
+    "gql_task_group_delete_perms": ["190004"],
+    "gql_task_search_perms": ["191001"],
+    "gql_task_create_perms": ["191002"],
+    "gql_task_update_perms": ["191003"],
+    "gql_task_delete_perms": ["191004"],
 }
 
 
@@ -13,15 +16,17 @@ class TasksManagementConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'tasks_management'
 
-    gql_task_management_search_perms = None
-    gql_task_management_create_perms = None
-    gql_task_management_update_perms = None
-    gql_task_management_delete_perms = None
+    gql_task_group_search_perms = None
+    gql_task_group_create_perms = None
+    gql_task_group_update_perms = None
+    gql_task_group_delete_perms = None
+    gql_task_search_perms = None
+    gql_task_create_perms = None
+    gql_task_update_perms = None
+    gql_task_delete_perms = None
 
     def ready(self):
         from core.models import ModuleConfiguration
-
-        print("Hello automatic update")
 
         cfg = ModuleConfiguration.get_or_default(self.name, DEFAULT_CONFIG)
         self.__load_config(cfg)
