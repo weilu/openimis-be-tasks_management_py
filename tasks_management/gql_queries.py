@@ -22,11 +22,8 @@ class TaskGroupGQLType(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_user(self, info):
-        task_group_id = info.variable_values.get('id')
-        if task_group_id:
-            return TaskExecutor.objects.filter(task_group_id=task_group_id)
-        else:
-            return []
+        task_group_id = self.id
+        return TaskExecutor.objects.filter(task_group_id=task_group_id)
 
 
 class TaskExecutorGQLType(DjangoObjectType):
