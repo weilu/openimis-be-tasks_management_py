@@ -18,6 +18,11 @@ class TaskGroupGQLType(DjangoObjectType):
             "id": ["exact"],
             "code": ["exact", "iexact", "startswith", "istartswith", "contains", "icontains"],
             "completion_policy": ["exact", "iexact"],
+
+            "date_created": ["exact", "lt", "lte", "gt", "gte"],
+            "date_updated": ["exact", "lt", "lte", "gt", "gte"],
+            "is_deleted": ["exact"],
+            "version": ["exact"],
         }
         connection_class = ExtendedConnection
 
@@ -35,5 +40,10 @@ class TaskExecutorGQLType(DjangoObjectType):
         filter_fields = {
             **prefix_filterset("user__", UserGQLType._meta.filter_fields),
             **prefix_filterset("task_group__", TaskGroupGQLType._meta.filter_fields),
+
+            "date_created": ["exact", "lt", "lte", "gt", "gte"],
+            "date_updated": ["exact", "lt", "lte", "gt", "gte"],
+            "is_deleted": ["exact"],
+            "version": ["exact"],
         }
         connection_class = ExtendedConnection

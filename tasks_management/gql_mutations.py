@@ -27,8 +27,6 @@ class CreateTaskGroup(OpenIMISMutation.Input):
 
 class UpdateTaskGroup(CreateTaskGroup):
     id = graphene.UUID(required=True)
-    code = graphene.String(max_length=255)
-    completion_policy = graphene.Field(CreateTaskGroup.TaskGroupCompletionPolicyEnum)
 
 
 class CreateTaskGroupMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):

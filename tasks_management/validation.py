@@ -16,6 +16,13 @@ class TaskGroupValidation(BaseModelValidation):
             raise ValidationError(errors)
         super().validate_create(user, **data)
 
+    @classmethod
+    def validate_update(cls, user, **data):
+        errors = validate_task_group(data)
+        if errors:
+            raise ValidationError(errors)
+        super().validate_create(user, **data)
+
 
 class TaskExecutorValidation(BaseModelValidation):
     OBJECT_TYPE = TaskExecutor
