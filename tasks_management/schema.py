@@ -6,8 +6,7 @@ from django.db.models import Q
 from core.schema import OrderedDjangoFilterConnectionField
 from core.utils import append_validity_filter
 from tasks_management.apps import TasksManagementConfig
-from tasks_management.gql_mutations import CreateTaskGroupMutation, UpdateTaskGroupMutation, DeleteTaskGroupMutation, \
-    UpdateTaskGroupTaskExecutorsMutation
+from tasks_management.gql_mutations import CreateTaskGroupMutation, UpdateTaskGroupMutation, DeleteTaskGroupMutation
 from tasks_management.gql_queries import TaskGroupGQLType, TaskExecutorGQLType
 from tasks_management.models import TaskGroup, TaskExecutor
 
@@ -75,5 +74,3 @@ class Mutation(graphene.ObjectType):
     create_task_group = CreateTaskGroupMutation.Field()
     update_task_group = UpdateTaskGroupMutation.Field()
     delete_task_group = DeleteTaskGroupMutation.Field()
-
-    update_task_group_task_executors = UpdateTaskGroupTaskExecutorsMutation.Field()

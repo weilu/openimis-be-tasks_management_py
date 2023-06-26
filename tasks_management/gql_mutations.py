@@ -11,7 +11,7 @@ from tasks_management.models import TaskGroup
 from tasks_management.services import TaskGroupService
 
 
-class BaseTaskGroup(OpenIMISMutation.Input):
+class CreateTaskGroup(OpenIMISMutation.Input):
     class TaskGroupCompletionPolicyEnum(graphene.Enum):
         ALL = TaskGroup.TaskGroupCompletionPolicy.ALL
         ANY = TaskGroup.TaskGroupCompletionPolicy.ANY
@@ -19,22 +19,16 @@ class BaseTaskGroup(OpenIMISMutation.Input):
 
     code = graphene.String(required=True, max_length=255)
     completion_policy = graphene.Field(TaskGroupCompletionPolicyEnum, required=True)
+    user_ids = graphene.List(graphene.UUID)
 
     def resolve_completion_policy(self, info):
         return self.completion_policy
 
 
-class CreateTaskGroup(BaseTaskGroup):
-    user_ids = graphene.List(graphene.UUID)
-
-
-class UpdateTaskGroup(BaseTaskGroup):
+class UpdateTaskGroup(CreateTaskGroup):
     id = graphene.UUID(required=True)
-
-
-class UpdateTaskGroupTaskExecutors(OpenIMISMutation.Input):
-    id = graphene.UUID(required=True)
-    user_ids = graphene.List(graphene.UUID)
+    code = graphene.String(max_length=255)
+    completion_policy = graphene.Field(CreateTaskGroup.TaskGroupCompletionPolicyEnum)
 
 
 class CreateTaskGroupMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
@@ -120,31 +114,3 @@ class DeleteTaskGroupMutation(BaseHistoryModelDeleteMutationMixin, BaseMutation)
 
     class Input(OpenIMISMutation.Input):
         ids = graphene.List(graphene.UUID)
-
-
-class UpdateTaskGroupTaskExecutorsMutation(BaseHistoryModelUpdateMutationMixin, BaseMutation):
-    _mutation_class = "UpdateTaskGroupTaskExecutorsMutation"
-    _mutation_module = "tasks_management"
-    _model = TaskGroup
-
-    @classmethod
-    def _validate_mutation(cls, user, **data):
-        if type(user) is AnonymousUser or not user.has_perms(
-                TasksManagementConfig.gql_task_group_update_perms):
-            raise ValidationError("mutation.authentication_required")
-
-    @classmethod
-    def _mutate(cls, user, **data):
-        if "client_mutation_id" in data:
-            data.pop('client_mutation_id')
-        if "client_mutation_label" in data:
-            data.pop('client_mutation_label')
-
-        service = TaskGroupService(user)
-        res = service.update_task_group_task_executors(data)
-        if not res['success']:
-            return res
-        return None
-
-    class Input(UpdateTaskGroupTaskExecutors):
-        pass

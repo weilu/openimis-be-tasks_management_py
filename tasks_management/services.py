@@ -38,26 +38,27 @@ class TaskGroupService(BaseService):
         except Exception as exc:
             return output_exception(model_name=self.OBJECT_TYPE.__name__, method="create", exception=exc)
 
-    def update(self, obj_data):
-        return super().update()
-
     @check_authentication
+    def update(self, obj_data):
+        user_ids = obj_data.pop('user_ids')
+        task_group_id = obj_data.get('id')
+        task_group = TaskGroup.objects.get(id=task_group_id)
+        current_task_executors = task_group.taskexecutor_set.filter(is_deleted=False)
+        current_user_ids = current_task_executors.values_list('user__id', flat=True)
+        if set(current_user_ids) != set(user_ids):
+            self._update_task_group_task_executors(task_group, user_ids)
+        return super().update(obj_data)
+
     @transaction.atomic
-    def update_task_group_task_executors(self, obj_data: Dict[str, any]):
+    def _update_task_group_task_executors(self, task_group, user_ids):
         try:
-            self.validation_class.validate_update(self.user, **obj_data)
-            user_ids = obj_data.pop('user_ids')
-            task_group_id = obj_data.pop('id')
-            obj_: TaskGroup = self.OBJECT_TYPE.objects.filter(id=task_group_id).first()
-            obj_.taskexecutor_set.all().delete()
+            task_group.taskexecutor_set.all().delete()
             service = TaskExecutorService(self.user)
             for user_id in user_ids:
-                service.create({'task_group_id': task_group_id,
+                service.create({'task_group_id': task_group.id,
                                 'user_id': user_id})
-            task_group_dict_repr = model_representation(obj_)
-            return output_result_success(task_group_dict_repr)
         except Exception as exc:
-            return output_exception(model_name=self.OBJECT_TYPE.__name__, method="update", exception=exc)
+            raise exc
 
     def delete(self, obj_data: Dict[str, any]):
         id = obj_data.get("id")
