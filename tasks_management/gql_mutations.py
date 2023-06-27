@@ -48,9 +48,9 @@ class CreateTaskGroupMutation(BaseHistoryModelCreateMutationMixin, BaseMutation)
             data.pop('client_mutation_label')
 
         service = TaskGroupService(user)
-        res = service.create(data)
-        if not res['success']:
-            return res
+        response = service.create(data)
+        if not response['success']:
+            return response
         return None
 
     class Input(CreateTaskGroup):
@@ -76,9 +76,9 @@ class UpdateTaskGroupMutation(BaseHistoryModelUpdateMutationMixin, BaseMutation)
             data.pop('client_mutation_label')
 
         service = TaskGroupService(user)
-        res = service.update(data)
-        if not res['success']:
-            return res
+        response = service.update(data)
+        if not response['success']:
+            return response
         return None
 
     class Input(UpdateTaskGroup):

@@ -29,7 +29,7 @@ class Query(graphene.ObjectType):
         dateValidFrom__Gte=graphene.DateTime(),
         dateValidTo__Lte=graphene.DateTime(),
         client_mutation_id=graphene.String(),
-        taskGroupIdStr=graphene.String(),
+        taskGroupIdString=graphene.String(),
     )
 
     def resolve_task_group(self, info, **kwargs):
@@ -53,9 +53,9 @@ class Query(graphene.ObjectType):
         if client_mutation_id:
             filters.append(Q(mutations__mutation__client_mutation_id=client_mutation_id))
 
-        task_group_id_str = kwargs.get("taskGroupIdStr")
-        if task_group_id_str:
-            filters.append(Q(taskgroup__user__id_icontains=task_group_id_str))
+        task_group_id_string = kwargs.get("taskGroupIdString")
+        if task_group_id_string:
+            filters.append(Q(taskgroup__user__id_icontains=task_group_id_string))
 
         Query._check_permissions(
             info.context.user,

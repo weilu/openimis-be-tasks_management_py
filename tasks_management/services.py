@@ -39,7 +39,7 @@ class TaskGroupService(BaseService):
             return output_exception(model_name=self.OBJECT_TYPE.__name__, method="create", exception=exc)
 
     @check_authentication
-    def update(self, obj_data):
+    def update(self, obj_data: Dict[str, any]):
         user_ids = obj_data.pop('user_ids')
         task_group_id = obj_data.get('id')
         task_group = TaskGroup.objects.get(id=task_group_id)
