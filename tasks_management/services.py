@@ -1,7 +1,6 @@
 import logging
 from datetime import date
-from typing import Union, Dict, Type
-from uuid import UUID
+from typing import Dict, Type
 
 from django.db import transaction
 
@@ -33,24 +32,26 @@ class TaskService(BaseService):
     def delete(self, obj_data):
         return super().delete(obj_data)
 
-    def complete_task(self, uuid: Union[str, UUID], success: bool, data: Dict):
-        obj = self.OBJECT_TYPE.objects.filter(id=uuid).first()
+    @register_service_signal('task_service.execute_task')
+    def execute_task(self, obj_data):
+        obj = self.OBJECT_TYPE.objects.filter(id=obj_data['id']).first()
         if not obj:
-            return self._result(False, None, 'Task not found', str(uuid))
-        if not obj.status == self.OBJECT_TYPE.Status.ACCEPTED:
-            return self._result(False, None, 'Task not in `ACCEPTED` status', str(uuid))
-        if success:
-            obj.status = self.OBJECT_TYPE.Status.COMPLETED
+            return self._result(False, None, 'Task not found', str(obj_data['id']))
 
-            # TODO send signal
-        else:
-            obj.status = self.OBJECT_TYPE.Status.FAILED
+        return self._result(True, data={'task': obj})
 
+    @register_service_signal('task_service.complete_task')
+    def complete_task(self, obj_data):
+        obj = self.OBJECT_TYPE.objects.filter(id=obj_data['id']).first()
+        if not obj:
+            return self._result(False, None, 'Task not found', str(obj_data['id']))
+
+        obj.status = Task.Status.FAILED if obj_data.get('failed', False) else Task.Status.COMPLETED
         obj.save(username=self.user.login_name)
-        return self._result(success)
+        return self._result(True, data={'task': obj})
 
     def _base_payload_adjust(self, obj_data):
-        data = obj_data.pop('data', None)
+        data = obj_data.pop('data', {})
         if isinstance(data, dict):
             self._convert_dates_to_strings(data)
         return {**obj_data, "data": data}
