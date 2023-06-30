@@ -1,4 +1,4 @@
-from unittest import TestCase
+from django.test import TestCase
 
 from tasks_management.models import TaskGroup
 from tasks_management.services import TaskGroupService
@@ -27,7 +27,7 @@ class TaskGroupServiceTest(TestCase):
         }
 
     def test_add_task_group(self):
-        result = self.service.create(task_group_add_payload)
+        result = self.service.create(self.payload)
         self.assertTrue(result.get('success', False), result.get('detail', "No details provided"))
         uuid = result.get('data', {}).get('uuid', None)
         query = self.query_all.filter(uuid=uuid)

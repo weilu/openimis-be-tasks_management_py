@@ -3,7 +3,11 @@ from django.utils.translation import gettext as _
 
 from core.models import User
 from core.validation import BaseModelValidation
-from tasks_management.models import TaskGroup, TaskExecutor
+from tasks_management.models import TaskGroup, TaskExecutor, Task
+
+
+class TaskValidation(BaseModelValidation):
+    OBJECT_TYPE = Task
 
 
 class TaskGroupValidation(BaseModelValidation):

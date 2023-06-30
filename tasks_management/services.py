@@ -1,14 +1,56 @@
 import logging
-from typing import Type, Dict
+from datetime import date
+from typing import Dict, Type
 
 from django.db import transaction
 
-from core.services import create_or_update_core_user, BaseService
-from core.services.utils import check_authentication, output_exception, model_representation, output_result_success
-from tasks_management.models import TaskGroup, TaskExecutor
-from tasks_management.validation import TaskGroupValidation, TaskExecutorValidation
+from core.services import BaseService
+from core.signals import register_service_signal
+from core.services.utils import check_authentication, output_exception, output_result_success, model_representation
+
+from tasks_management.models import TaskGroup, TaskExecutor, Task
+from tasks_management.validation import TaskGroupValidation, TaskExecutorValidation, TaskValidation
 
 logger = logging.getLogger(__name__)
+
+
+class TaskService(BaseService):
+    OBJECT_TYPE = Task
+
+    def __init__(self, user, validation_class=TaskValidation):
+        super().__init__(user, validation_class)
+
+    @register_service_signal('task_service.create')
+    def create(self, obj_data):
+        return super().create(obj_data)
+
+    @register_service_signal('task_service.update')
+    def update(self, obj_data):
+        return super().update(obj_data)
+
+    @register_service_signal('task_service.delete')
+    def delete(self, obj_data):
+        return super().delete(obj_data)
+
+    @register_service_signal('task_service.execute_task')
+    def execute_task(self, obj_data):
+        try:
+            with transaction.atomic():
+                obj = self.OBJECT_TYPE.objects.get(id=obj_data['id'])
+                return output_result_success({'task': model_representation(obj)})
+        except Exception as exc:
+            return output_exception(model_name=self.OBJECT_TYPE.__name__, method="execute", exception=exc)
+
+    @register_service_signal('task_service.complete_task')
+    def complete_task(self, obj_data):
+        try:
+            with transaction.atomic():
+                obj = self.OBJECT_TYPE.objects.get(id=obj_data['id'])
+                obj.status = Task.Status.FAILED if obj_data.get('failed', False) else Task.Status.COMPLETED
+                obj.save(username=self.user.login_name)
+                return output_result_success({'task': model_representation(obj)})
+        except Exception as exc:
+            return output_exception(model_name=self.OBJECT_TYPE.__name__, method="complete", exception=exc)
 
 
 class TaskGroupService(BaseService):
