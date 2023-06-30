@@ -6,7 +6,7 @@ from django.db import transaction
 
 from core.services import BaseService
 from core.signals import register_service_signal
-from core.services.utils import check_authentication, output_exception
+from core.services.utils import check_authentication, output_exception, output_result_success, model_representation
 
 from tasks_management.models import TaskGroup, TaskExecutor, Task
 from tasks_management.validation import TaskGroupValidation, TaskExecutorValidation, TaskValidation
@@ -34,43 +34,23 @@ class TaskService(BaseService):
 
     @register_service_signal('task_service.execute_task')
     def execute_task(self, obj_data):
-        obj = self.OBJECT_TYPE.objects.filter(id=obj_data['id']).first()
-        if not obj:
-            return self._result(False, None, 'Task not found', str(obj_data['id']))
-
-        return self._result(True, data={'task': obj})
+        try:
+            with transaction.atomic():
+                obj = self.OBJECT_TYPE.objects.get(id=obj_data['id'])
+                return output_result_success({'task': model_representation(obj)})
+        except Exception as exc:
+            return output_exception(model_name=self.OBJECT_TYPE.__name__, method="execute", exception=exc)
 
     @register_service_signal('task_service.complete_task')
     def complete_task(self, obj_data):
-        obj = self.OBJECT_TYPE.objects.filter(id=obj_data['id']).first()
-        if not obj:
-            return self._result(False, None, 'Task not found', str(obj_data['id']))
-
-        obj.status = Task.Status.FAILED if obj_data.get('failed', False) else Task.Status.COMPLETED
-        obj.save(username=self.user.login_name)
-        return self._result(True, data={'task': obj})
-
-    def _base_payload_adjust(self, obj_data):
-        data = obj_data.pop('data', {})
-        if isinstance(data, dict):
-            self._convert_dates_to_strings(data)
-        return {**obj_data, "data": data}
-
-    def _convert_dates_to_strings(self, dictionary):
-        for key, value in dictionary.items():
-            if isinstance(value, date):
-                dictionary[key] = value.isoformat()
-
-    def _result(self, success, data=None, message='', details=''):
-        if data is None:
-            data = dict()
-        result = {'success': success}
-        if success:
-            result['data'] = data
-        else:
-            result['message'] = message
-            result['details'] = details
-        return result
+        try:
+            with transaction.atomic():
+                obj = self.OBJECT_TYPE.objects.get(id=obj_data['id'])
+                obj.status = Task.Status.FAILED if obj_data.get('failed', False) else Task.Status.COMPLETED
+                obj.save(username=self.user.login_name)
+                return output_result_success({'task': model_representation(obj)})
+        except Exception as exc:
+            return output_exception(model_name=self.OBJECT_TYPE.__name__, method="complete", exception=exc)
 
 
 class TaskGroupService(BaseService):
