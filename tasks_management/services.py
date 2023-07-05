@@ -5,8 +5,9 @@ from typing import Dict, Type
 from django.db import transaction
 
 from core.services import BaseService
-from core.signals import register_service_signal
+from core.signals import register_service_signal, REGISTERED_SERVICE_SIGNALS, __register_service_signal
 from core.services.utils import check_authentication, output_exception, output_result_success, model_representation
+from individual.models import Group
 
 from tasks_management.models import TaskGroup, TaskExecutor, Task
 from tasks_management.validation import TaskGroupValidation, TaskExecutorValidation, TaskValidation
@@ -51,6 +52,21 @@ class TaskService(BaseService):
                 return output_result_success({'task': model_representation(obj)})
         except Exception as exc:
             return output_exception(model_name=self.OBJECT_TYPE.__name__, method="complete", exception=exc)
+
+    @register_service_signal('task_service.resolve_task')
+    def resolve_task(self, obj_data):
+        try:
+            self.validation_class.validate_update(self.user, **obj_data)
+            obj = self.OBJECT_TYPE.objects.get(id=obj_data['id'])
+            incoming_status = obj_data.get('business_status')
+            self._update_task_business_status(obj, incoming_status)
+            return output_result_success({'task': model_representation(obj)})
+        except Exception as exc:
+            return output_exception(model_name=self.OBJECT_TYPE.__name__, method="resolve", exception=exc)
+
+    def _update_task_business_status(self, task, incoming_status):
+        task.business_status = {**task.business_status, **incoming_status}
+        task.save(username=self.user.login_name)
 
 
 class TaskGroupService(BaseService):
