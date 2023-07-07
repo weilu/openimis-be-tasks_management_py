@@ -11,7 +11,7 @@ from tasks_management.models import TaskGroup, Task
 from tasks_management.services import TaskGroupService, TaskService
 
 
-class CreateTaskGroup(OpenIMISMutation.Input):
+class CreateTaskGroupInput(OpenIMISMutation.Input):
     class TaskGroupCompletionPolicyEnum(graphene.Enum):
         ALL = TaskGroup.TaskGroupCompletionPolicy.ALL
         ANY = TaskGroup.TaskGroupCompletionPolicy.ANY
@@ -36,8 +36,13 @@ class UpdateTaskInput(OpenIMISMutation.Input):
     task_group_id = graphene.UUID(required=False)
 
 
-class UpdateTaskGroup(CreateTaskGroup):
+class UpdateTaskGroupInput(CreateTaskGroupInput):
     id = graphene.UUID(required=True)
+
+
+class ResolveTaskGroupInput(OpenIMISMutation.Input):
+    id = graphene.UUID(required=True)
+    business_status = graphene.JSONString(required=True)
 
 
 class CreateTaskGroupMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
@@ -64,7 +69,7 @@ class CreateTaskGroupMutation(BaseHistoryModelCreateMutationMixin, BaseMutation)
             return response
         return None
 
-    class Input(CreateTaskGroup):
+    class Input(CreateTaskGroupInput):
         pass
 
 
@@ -92,7 +97,7 @@ class UpdateTaskGroupMutation(BaseHistoryModelUpdateMutationMixin, BaseMutation)
             return response
         return None
 
-    class Input(UpdateTaskGroup):
+    class Input(UpdateTaskGroupInput):
         pass
 
 
@@ -150,4 +155,32 @@ class UpdateTaskMutation(BaseHistoryModelUpdateMutationMixin, BaseMutation):
         return None
 
     class Input(UpdateTaskInput):
+        pass
+
+
+class ResolveTaskMutation(BaseHistoryModelUpdateMutationMixin, BaseMutation):
+    _mutation_class = "ResolveTaskMutation"
+    _mutation_module = "tasks_management"
+    _model = Task
+
+    @classmethod
+    def _validate_mutation(cls, user, **data):
+        if type(user) is AnonymousUser or not user.has_perms(
+                TasksManagementConfig.gql_task_update_perms):
+            raise ValidationError("mutation.authentication_required")
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        if "client_mutation_id" in data:
+            data.pop('client_mutation_id')
+        if "client_mutation_label" in data:
+            data.pop('client_mutation_label')
+
+        service = TaskService(user)
+        res = service.resolve_task(data)
+        if not res['success']:
+            return res
+        return None
+
+    class Input(ResolveTaskGroupInput):
         pass
