@@ -18,7 +18,8 @@ class TaskGroupValidation(BaseModelValidation):
 
     @classmethod
     def validate_update(cls, user, **data):
-        errors = validate_task_group(data)
+        uuid = data.get('id')
+        errors = validate_task_group(data, uuid)
         if errors:
             raise ValidationError(errors)
         super().validate_create(user, **data)
@@ -94,7 +95,7 @@ def validate_bf_unique_code(code, uuid=None):
 
 
 def validate_not_empty_field(string, field):
-    if not string:
+    if string.strip() == "":
         return [{"message": _("tasks_management.validation.field_empty") % {
             'field': field
         }}]
