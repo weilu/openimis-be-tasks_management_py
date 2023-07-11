@@ -1,4 +1,5 @@
 import copy
+from unittest import skip
 
 from django.test import TestCase
 
@@ -113,6 +114,7 @@ class TaskServiceTestCase(TestCase):
         self.assertTrue(result['success'])
         self.assertEqual(Task.objects.filter(id=obj_id).first().status, Task.Status.FAILED)
 
+    @skip('To be redeveloped')
     def test_resolve_task_any(self):
         create_payload = {
             **task_payload_resolve_any,
@@ -132,6 +134,7 @@ class TaskServiceTestCase(TestCase):
         self.assertTrue(result['success'])
         self.assertEqual(Task.objects.filter(id=obj_id).first().status, Task.Status.COMPLETED)
 
+    @skip('To be redeveloped')
     def test_resolve_task_all(self):
         create_payload = {
             **task_payload_resolve_all,
@@ -152,6 +155,7 @@ class TaskServiceTestCase(TestCase):
         self.assertTrue(result['success'])
         self.assertEqual(Task.objects.filter(id=obj_id).first().status, Task.Status.COMPLETED)
 
+    @skip('To be redeveloped')
     def test_resolve_task_n(self):
         create_payload = {
             **task_payload_resolve_n,

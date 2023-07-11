@@ -38,13 +38,10 @@ def _convert_to_serializable_json(entity):
 
 
 def is_task_triage(user):
-    required_permissions = (
-            TasksManagementConfig.gql_task_group_create_perms +
-            TasksManagementConfig.gql_task_group_search_perms +
-            TasksManagementConfig.gql_task_group_update_perms +
-            TasksManagementConfig.gql_task_group_delete_perms
-    )
-    return all(user.has_perms(perm) for perm in required_permissions)
+    return user.has_perms(TasksManagementConfig.gql_task_group_create_perms
+                          + TasksManagementConfig.gql_task_group_search_perms
+                          + TasksManagementConfig.gql_task_group_update_perms
+                          + TasksManagementConfig.gql_task_group_delete_perms)
 
 
 class TaskGQLType(DjangoObjectType):
@@ -82,8 +79,8 @@ class TaskGQLType(DjangoObjectType):
     def get_queryset(cls, queryset, info):
         user = info.context.user
         if user.is_imis_admin or is_task_triage(user):
-            return Task.objects.filter(is_deleted=False)
-        return Task.objects.filter(
+            return queryset.filter(is_deleted=False)
+        return queryset.filter(
             Q(task_group__taskexecutor__user=user) & ~Q(status=Task.Status.RECEIVED),
             is_deleted=False
         )
