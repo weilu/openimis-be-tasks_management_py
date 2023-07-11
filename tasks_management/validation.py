@@ -18,7 +18,8 @@ class TaskGroupValidation(BaseModelValidation):
 
     @classmethod
     def validate_update(cls, user, **data):
-        errors = validate_task_group(data)
+        uuid = data.get('id')
+        errors = validate_task_group(data, uuid)
         if errors:
             raise ValidationError(errors)
         super().validate_create(user, **data)
