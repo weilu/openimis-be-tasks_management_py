@@ -95,7 +95,7 @@ def validate_bf_unique_code(code, uuid=None):
 
 
 def validate_not_empty_field(string, field):
-    if string.strip() == "":
+    if not string:
         return [{"message": _("tasks_management.validation.field_empty") % {
             'field': field
         }}]
