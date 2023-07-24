@@ -8,7 +8,7 @@ It is dedicated to be deployed as a module of [openimis-be_py](https://github.co
 * task_management_taskexecutor, task_management_historicaltaskexecutor > TaskExecutor
 
 ## GraphQl Queries
-* task, taskgroup, taskexecutor
+* task, taskGroup, taskExecutor
 
 ## Services
 - Task
@@ -17,6 +17,7 @@ It is dedicated to be deployed as a module of [openimis-be_py](https://github.co
   - delete
   - execute_task
   - complete_task
+  - resolve_task
 - TaskGroup
   - create
   - update
@@ -41,7 +42,7 @@ It is dedicated to be deployed as a module of [openimis-be_py](https://github.co
 - core
 
 ## Creating execution action handlers and business event handlers
-When user action specified by the task is finished, the task service sends ``task_service.execute_task`` signal.
+When user action specified by the task is being passed to backend, the task service sends ``task_service.resolve_task`` signal. 
 The approach for handler is to bind to ``after`` signal and check the specific ``executor_action_event`` of the task.
 The same approach is used for business event handlers, being required to bind on ``task_service.complete_task``.
 
@@ -49,7 +50,7 @@ The same approach is used for business event handlers, being required to bind on
 # in signals.py in any module
 def bind_service_signals():
     bind_service_signal(
-        'task_service.execute_task',
+        'task_service.resolve_task',
         handler_hook,
         bind_type=ServiceSignalBindType.AFTER
     )
