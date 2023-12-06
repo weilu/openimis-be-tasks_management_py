@@ -23,7 +23,7 @@ class TaskDataMixin:
 
     task_payload = {
         'source': 'test_source',
-        'entity': InteractiveUser.objects.first(),
+        'entity': None,
         'status': Task.Status.RECEIVED,
         'executor_action_event': 'test_executor_action',
         'business_status': dict(),
@@ -67,5 +67,6 @@ class TaskDataMixin:
         cls.task_payload_resolve_n['entity'] = entity
         cls.task_payload_resolve_all['entity'] = entity
         cls.task_payload_resolve_any['entity'] = entity
+        cls.task_payload['entity'] = entity
 
 
