@@ -13,18 +13,18 @@ class TaskGroupValidation(BaseModelValidation):
 
     @classmethod
     def validate_create(cls, user, **data):
+        super().validate_create(user, **data)
         errors = validate_task_group(data)
         if errors:
             raise ValidationError(errors)
-        super().validate_create(user, **data)
 
     @classmethod
     def validate_update(cls, user, **data):
+        super().validate_update(user, **data)
         uuid = data.get('id')
         errors = validate_task_group(data, uuid)
         if errors:
             raise ValidationError(errors)
-        super().validate_create(user, **data)
 
 
 class TaskExecutorValidation(BaseModelValidation):
@@ -32,10 +32,10 @@ class TaskExecutorValidation(BaseModelValidation):
 
     @classmethod
     def validate_create(cls, user, **data):
+        super().validate_create(user, **data)
         errors = validate_task_executor(data)
         if errors:
             raise ValidationError(errors)
-        super().validate_create(user, **data)
 
 
 class TaskValidation(BaseModelValidation):
@@ -43,30 +43,30 @@ class TaskValidation(BaseModelValidation):
 
     @classmethod
     def validate_create(cls, user, **data):
+        super().validate_create(user, **data)
         errors = [
             *validate_existing_task(data)
         ]
         if errors:
             raise ValidationError(errors)
-        super().validate_create(user, **data)
 
     @classmethod
     def validate_update(cls, user, **data):
+        super().validate_update(user, **data)
         errors = [
             *validate_task_status(data)
         ]
         if errors:
             raise ValidationError(errors)
-        super().validate_create(user, **data)
 
     @classmethod
     def validate_delete(cls, user, **data):
+        super().validate_delete(user, **data)
         errors = [
             *validate_existing_task(data)
         ]
         if errors:
             raise ValidationError(errors)
-        super().validate_create(user, **data)
 
 
 def validate_task_group(data, uuid=None):
