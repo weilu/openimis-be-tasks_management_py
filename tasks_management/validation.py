@@ -13,12 +13,14 @@ class TaskGroupValidation(BaseModelValidation):
 
     @classmethod
     def validate_create(cls, user, **data):
+        super().validate_create(user, **data)
         errors = validate_task_group(data)
         if errors:
             raise ValidationError(errors)
 
     @classmethod
     def validate_update(cls, user, **data):
+        super().validate_update(user, **data)
         uuid = data.get('id')
         errors = validate_task_group(data, uuid)
         if errors:
@@ -30,6 +32,7 @@ class TaskExecutorValidation(BaseModelValidation):
 
     @classmethod
     def validate_create(cls, user, **data):
+        super().validate_create(user, **data)
         errors = validate_task_executor(data)
         if errors:
             raise ValidationError(errors)
@@ -40,6 +43,7 @@ class TaskValidation(BaseModelValidation):
 
     @classmethod
     def validate_create(cls, user, **data):
+        super().validate_create(user, **data)
         errors = [
             *validate_existing_task(data)
         ]
@@ -48,6 +52,7 @@ class TaskValidation(BaseModelValidation):
 
     @classmethod
     def validate_update(cls, user, **data):
+        super().validate_update(user, **data)
         errors = [
             *validate_task_status(data)
         ]
@@ -56,6 +61,7 @@ class TaskValidation(BaseModelValidation):
 
     @classmethod
     def validate_delete(cls, user, **data):
+        super().validate_delete(user, **data)
         errors = [
             *validate_existing_task(data)
         ]
