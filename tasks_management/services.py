@@ -177,7 +177,7 @@ class CreateCheckerLogicServiceMixin(ABC):
         return TasksManagementConfig.default_executor_event
 
     def _adjust_create_task_data(self, entity, obj_data):
-        return _get_std_task_data_payload(entity, obj_data)
+        return _get_std_crud_task_data_payload(entity, obj_data)
 
     def _get_business_data_serializer(self):
         return f'{self.__class__.__module__}.{self.__class__.__name__}._business_data_serializer'
@@ -229,7 +229,7 @@ class UpdateCheckerLogicServiceMixin(ABC):
         return TasksManagementConfig.default_executor_event
 
     def _adjust_update_task_data(self, entity, obj_data):
-        return _get_std_task_data_payload(entity, obj_data)
+        return _get_std_crud_task_data_payload(entity, obj_data)
 
     def _get_business_data_serializer(self):
         return f'{self.__class__.__module__}.{self.__class__.__name__}._business_data_serializer'
@@ -281,7 +281,7 @@ class DeleteCheckerLogicServiceMixin(ABC):
         return TasksManagementConfig.default_executor_event
 
     def _adjust_delete_task_data(self, entity, obj_data):
-        return _get_std_task_data_payload(entity, obj_data)
+        return _get_std_crud_task_data_payload(entity, obj_data)
 
     def _get_business_data_serializer(self):
         return f'{self.__class__.__module__}.{self.__class__.__name__}._business_data_serializer'
@@ -347,12 +347,13 @@ def on_task_complete_service_handler(service_type: Type[BaseService]):
     return func
 
 
-def _get_std_task_data_payload(entity, payload):
+def serialize_value(value):
+    return str(value) if any(isinstance(value, t) for t in non_serializable_types) else value
+
+
+def _get_std_crud_task_data_payload(entity, payload):
     incoming_data = {}
     current_data = {}
-
-    def serialize_value(value):
-        return str(value) if any(isinstance(value, t) for t in non_serializable_types) else value
 
     for key in payload:
         incoming_value = serialize_value(payload[key])
@@ -363,6 +364,16 @@ def _get_std_task_data_payload(entity, payload):
             current_data[key] = serialize_value(entity_value) if entity_value else entity_value
 
     return {"incoming_data": incoming_data, "current_data": current_data}
+
+
+def _get_std_task_data_payload(payload):
+    incoming_data = {}
+
+    for key in payload:
+        incoming_value = serialize_value(payload[key])
+        incoming_data[key] = incoming_value
+
+    return incoming_data
 
 
 def crud_business_data_builder(data, serializer):
