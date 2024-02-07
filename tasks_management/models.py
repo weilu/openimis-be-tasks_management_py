@@ -31,9 +31,9 @@ class Task(HistoryModel):
         COMPLETED = 'COMPLETED', _('Completed')
         FAILED = 'FAILED', _('Failed')
 
-    source = models.CharField(max_length=255, null=True)
+    source = models.CharField(max_length=255,  blank=True, null=True)
     entity_type = models.ForeignKey(ContentType, models.DO_NOTHING, blank=True, null=True, unique=False)
-    entity_id = models.CharField(max_length=255, null=True)
+    entity_id = models.CharField(max_length=255,  blank=True, null=True)
     entity = GenericForeignKey('entity_type', 'entity_id')
     status = models.CharField(max_length=255, choices=Status.choices, default=Status.RECEIVED)
     executor_action_event = models.CharField(max_length=255, blank=True, null=True)
