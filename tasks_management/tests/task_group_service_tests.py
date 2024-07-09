@@ -4,7 +4,7 @@ from tasks_management.models import TaskGroup
 from tasks_management.services import TaskGroupService
 from tasks_management.tests.data import TaskDataMixin
 
-from tasks_management.tests.helpers import LogInHelper
+from core.test_helpers import LogInHelper
 
 
 class TaskGroupServiceTest(TestCase, TaskDataMixin):
@@ -18,7 +18,8 @@ class TaskGroupServiceTest(TestCase, TaskDataMixin):
         super().setUpClass()
 
         cls.user = LogInHelper().get_or_create_user_api()
-        cls.task_executor = LogInHelper().get_or_create_task_executor_api()
+        cls.task_executor = LogInHelper().get_or_create_user_api(
+                username='TaskExecutor')
         cls.service = TaskGroupService(cls.user)
         cls.init_data()
         cls.query_all = TaskGroup.objects.filter(is_deleted=False)

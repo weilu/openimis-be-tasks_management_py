@@ -7,7 +7,7 @@ from tasks_management.apps import TasksManagementConfig
 from tasks_management.tests.data import TaskDataMixin
 from tasks_management.services import TaskService, TaskGroupService
 from tasks_management.models import Task
-from tasks_management.tests.helpers import LogInHelper
+from core.test_helpers import LogInHelper
 
 
 class TaskServiceTestCase(TestCase, TaskDataMixin):
@@ -22,7 +22,8 @@ class TaskServiceTestCase(TestCase, TaskDataMixin):
     def setUpClass(cls):
         super(TaskServiceTestCase, cls).setUpClass()
         cls.user = LogInHelper().get_or_create_user_api()
-        cls.task_executor = LogInHelper().get_or_create_task_executor_api()
+        cls.task_executor = LogInHelper().get_or_create_user_api(
+                username='TaskExecutor')
         cls.init_data()
         cls.taskgroup_all_id = cls.__create_taskgroup(cls.task_group_add_payload_all)
         cls.taskgroup_n_id = cls.__create_taskgroup(cls.task_group_add_payload_n)
