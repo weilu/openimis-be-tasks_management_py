@@ -40,7 +40,7 @@ class TaskService(BaseService):
     def create(self, obj_data):
         source = obj_data.get('source')
         task_group_query = TaskGroup.objects.filter(json_ext__contains={"task_sources": [source]})
-        if task_group_query.exists():
+        if task_group_query:
             obj_data = {**obj_data, "task_group": task_group_query.first(), "status": Task.Status.ACCEPTED}
         return super().create(obj_data)
 
