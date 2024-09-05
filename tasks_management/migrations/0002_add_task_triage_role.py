@@ -2,7 +2,6 @@
 
 from django.db import migrations
 
-from core.models import Role, RoleRight
 from core.utils import insert_role_right_for_system
 
 TASK_TRIAGE_ID = 2097152
@@ -11,16 +10,17 @@ ROLE_NAME = "Task Triage"
 TASK_TRIAGE_ROLE_RIGHTS = ["190001", "190002", "190003", "190004"]
 
 
-def _get_role(role_id):
+def _get_role(role_id, Role):
     return Role.objects.filter(is_system=role_id).first()
 
 
-def _add_rights_to_role(role):
+def _add_rights_to_role(role, apps):
     for right in TASK_TRIAGE_ROLE_RIGHTS:
-        insert_role_right_for_system(role, right)
+        insert_role_right_for_system(role, right, apps)
 
 
-def _remove_rights_from_role(role):
+def _remove_rights_from_role(role, apps):
+    RoleRight = apps.get_model('core', 'RoleRight')
     RoleRight.objects.filter(
         role__is_system=role,
         right_id__in=TASK_TRIAGE_ROLE_RIGHTS,
@@ -28,29 +28,32 @@ def _remove_rights_from_role(role):
     ).delete()
 
 
-def _create_task_triage_role():
-    role = _get_role(TASK_TRIAGE_ID)
+def _create_task_triage_role(Role):
+    role = _get_role(TASK_TRIAGE_ID, Role)
     if not role:
         task_triage = Role(is_system=TASK_TRIAGE_ID, name=ROLE_NAME, is_blocked=False)
         task_triage.save()
 
 
-def _delete_task_triage_role():
-    role = _get_role(TASK_TRIAGE_ID)
+def _delete_task_triage_role(Role):
+    role = _get_role(TASK_TRIAGE_ID, Role)
     if role:
         role.delete()
 
 
 def on_migration(apps, schema_editor):
-    _create_task_triage_role()
-    _add_rights_to_role(IMIS_ADMIN)
-    _add_rights_to_role(TASK_TRIAGE_ID)
+    RoleRight = apps.get_model('core', 'RoleRight')
+    Role = apps.get_model('core', 'Role')
+    _create_task_triage_role(Role)
+    _add_rights_to_role(IMIS_ADMIN, apps)
+    _add_rights_to_role(TASK_TRIAGE_ID, apps)
 
 
 def on_migration_reverse(apps, schema_editor):
-    _remove_rights_from_role(IMIS_ADMIN)
-    _remove_rights_from_role(TASK_TRIAGE_ID)
-    _delete_task_triage_role()
+    Role = apps.get_model('core', 'Role')
+    _remove_rights_from_role(IMIS_ADMIN, apps)
+    _remove_rights_from_role(TASK_TRIAGE_ID, apps)
+    _delete_task_triage_role(Role)
 
 
 class Migration(migrations.Migration):
