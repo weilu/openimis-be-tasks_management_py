@@ -26,7 +26,11 @@ class TaskGroupValidation(BaseModelValidation, UniqueCodeValidationMixin, Object
         super().validate_update(user, **data)
         uuid = data.get('id')
         cls.validate_object_exists(uuid)
-        cls.validate_unique_code_name(data.get('code'))
+        existing = cls.OBJECT_TYPE.objects.filter(id=uuid).first()
+
+        incoming_code = data.get('code')
+        if incoming_code != existing.code:
+            cls.validate_unique_code_name(data.get('code'))
         errors = validate_task_group(data, uuid)
         if errors:
             raise ValidationError(errors)
