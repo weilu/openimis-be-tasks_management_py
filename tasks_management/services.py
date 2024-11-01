@@ -160,6 +160,8 @@ class TaskGroupService(BaseService):
                     self._update_task_group_task_executors(task_group, user_ids)
                 return super().update(obj_data)
         except Exception as exc:
+            import traceback
+            logger.debug(traceback.format_exc())
             return output_exception(model_name=self.OBJECT_TYPE.__name__, method="update", exception=exc)
 
     @transaction.atomic
