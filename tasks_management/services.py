@@ -288,7 +288,15 @@ class UpdateCheckerLogicServiceMixin(ABC):
         return TasksManagementConfig.default_executor_event
 
     def _adjust_update_task_data(self, entity, obj_data):
+        self._align_json_ext(obj_data)
         return _get_std_crud_task_data_payload(entity, obj_data)
+
+    def _align_json_ext(self, obj_data):
+        json_ext = obj_data.get('json_ext')
+        if isinstance(json_ext, dict):
+            for key, value in obj_data.items():
+                if key in json_ext and json_ext[key] != value:
+                    json_ext[key] = value
 
     def _get_business_data_serializer(self):
         return f'{self.__class__.__module__}.{self.__class__.__name__}._business_data_serializer'
