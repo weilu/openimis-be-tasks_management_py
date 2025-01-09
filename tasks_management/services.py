@@ -14,19 +14,12 @@ from core.forms import User
 from core.services import BaseService
 from core.signals import register_service_signal
 from core.services.utils import check_authentication, output_exception, output_result_success, model_representation
+from core.utils import json_serialize_value
 from tasks_management.apps import TasksManagementConfig
 from tasks_management.models import TaskGroup, TaskExecutor, Task
 from tasks_management.validation import TaskGroupValidation, TaskExecutorValidation, TaskValidation
 
 logger = logging.getLogger(__name__)
-
-non_serializable_types = (
-    uuid.UUID,
-    datetime.date,
-    AdDate,
-    AdDatetime,
-    decimal.Decimal,
-)
 
 
 class TaskService(BaseService):
@@ -296,7 +289,7 @@ class UpdateCheckerLogicServiceMixin(ABC):
         if isinstance(json_ext, dict):
             for key, value in obj_data.items():
                 if key in json_ext and json_ext[key] != value:
-                    json_ext[key] = value
+                    json_ext[key] = json_serialize_value(value)
 
     def _get_business_data_serializer(self):
         return f'{self.__class__.__module__}.{self.__class__.__name__}._business_data_serializer'
@@ -414,21 +407,17 @@ def on_task_complete_service_handler(service_type):
     return func
 
 
-def serialize_value(value):
-    return str(value) if any(isinstance(value, t) for t in non_serializable_types) else value
-
-
 def _get_std_crud_task_data_payload(entity, payload):
     incoming_data = {}
     current_data = {}
 
     for key in payload:
-        incoming_value = serialize_value(payload[key])
+        incoming_value = json_serialize_value(payload[key])
         incoming_data[key] = incoming_value
 
         if entity:
             entity_value = getattr(entity, key)
-            current_data[key] = serialize_value(entity_value) if entity_value else entity_value
+            current_data[key] = json_serialize_value(entity_value) if entity_value else entity_value
 
     return {"incoming_data": incoming_data, "current_data": current_data}
 
@@ -437,7 +426,7 @@ def _get_std_task_data_payload(payload):
     incoming_data = {}
 
     for key in payload:
-        incoming_value = serialize_value(payload[key])
+        incoming_value = json_serialize_value(payload[key])
         incoming_data[key] = incoming_value
 
     return incoming_data
